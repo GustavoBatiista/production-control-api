@@ -12,10 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.gustavobatista.production_control_api.dto.ProductRequestDTO;
 import com.gustavobatista.production_control_api.dto.ProductResponseDTO;
 import com.gustavobatista.production_control_api.entity.Product;
+import com.gustavobatista.production_control_api.exception.BusinessException;
+import com.gustavobatista.production_control_api.exception.ResourceNotFoundException;
 import com.gustavobatista.production_control_api.repository.ProductRepository;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class ProductService {
 
     private final Logger logger = LoggerFactory.getLogger(ProductService.class);
@@ -31,19 +33,19 @@ public class ProductService {
         logger.debug("Creating product with code: {}", dto.getCode());
 
         if (dto.getCode() == null || dto.getCode().isBlank()) {
-            throw new IllegalArgumentException("Product code is required");
+            throw new BusinessException("Product code is required");
         }
 
         if (dto.getName() == null || dto.getName().isBlank()) {
-            throw new IllegalArgumentException("Product name is required");
+            throw new BusinessException("Product name is required");
         }
 
         if (dto.getPrice() == null || dto.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Product price must be greater than zero");
+            throw new BusinessException("Product price must be greater than zero");
         }
 
         if (productRepository.existsByCode(dto.getCode())) {
-            throw new IllegalArgumentException("Product code already exists");
+            throw new BusinessException("Product code already exists");
         }
 
         Product product = new Product(
@@ -73,7 +75,7 @@ public class ProductService {
     public ProductResponseDTO getProductById(Long id) {
         logger.debug("Getting product by id: {}", id);
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         return toResponseDTO(product);
     }
 
@@ -81,10 +83,10 @@ public class ProductService {
     public ProductResponseDTO updateProduct(Long id, ProductRequestDTO dto) {
         logger.debug("Updating product by id: {}", id);
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         if (!product.getCode().equals(dto.getCode())
                 && productRepository.existsByCode(dto.getCode())) {
-            throw new IllegalArgumentException("Product code already exists");
+            throw new BusinessException("Product code already exists");
         }
         product.setCode(dto.getCode());
         product.setName(dto.getName());
@@ -96,7 +98,7 @@ public class ProductService {
     public void deleteProduct(Long id) {
         logger.debug("Deleting product by id: {}", id);
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         productRepository.delete(product);
         logger.debug("Product deleted successfully id: {}", id);
     }
