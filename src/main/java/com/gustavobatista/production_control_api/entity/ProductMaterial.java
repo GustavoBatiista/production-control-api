@@ -31,6 +31,9 @@ public class ProductMaterial {
     @Column(nullable = false)
     private Integer quantityRequired;
 
+    public ProductMaterial() {
+    }
+
     public ProductMaterial(Long id, Product product, RawMaterial rawMaterial, Integer quantityRequired) {
         this.id = id;
         this.product = product;

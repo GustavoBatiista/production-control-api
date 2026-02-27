@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gustavobatista.production_control_api.dto.ProducibleProductResponseDTO;
 import com.gustavobatista.production_control_api.dto.ProductRequestDTO;
 import com.gustavobatista.production_control_api.dto.ProductResponseDTO;
 import com.gustavobatista.production_control_api.service.ProductService;
@@ -59,5 +60,11 @@ public class ProductController {
         productService.deleteProduct(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }    
+
+    @GetMapping("/producible")
+    public ResponseEntity<List<ProducibleProductResponseDTO>> getProducibleProducts() {
+        List<ProducibleProductResponseDTO> response = productService.getProducibleProducts();
+        return ResponseEntity.ok(response);
+    }
 
 }

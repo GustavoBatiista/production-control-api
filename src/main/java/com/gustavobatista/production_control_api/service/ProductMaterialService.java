@@ -13,8 +13,7 @@ import com.gustavobatista.production_control_api.exception.ResourceNotFoundExcep
 import com.gustavobatista.production_control_api.repository.ProductMaterialRepository;
 import com.gustavobatista.production_control_api.repository.ProductRepository;
 import com.gustavobatista.production_control_api.repository.RawMaterialRepository;
-
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional

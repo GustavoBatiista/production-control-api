@@ -1,6 +1,7 @@
 package com.gustavobatista.production_control_api.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,11 +10,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.gustavobatista.production_control_api.dto.ProducibleProductResponseDTO;
 import com.gustavobatista.production_control_api.dto.ProductRequestDTO;
 import com.gustavobatista.production_control_api.dto.ProductResponseDTO;
 import com.gustavobatista.production_control_api.entity.Product;
+import com.gustavobatista.production_control_api.entity.ProductMaterial;
 import com.gustavobatista.production_control_api.exception.BusinessException;
 import com.gustavobatista.production_control_api.exception.ResourceNotFoundException;
+import com.gustavobatista.production_control_api.repository.ProductMaterialRepository;
 import com.gustavobatista.production_control_api.repository.ProductRepository;
 
 @Service
@@ -24,8 +28,11 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
-    public ProductService(ProductRepository productRepository) {
+    private final ProductMaterialRepository productMaterialRepository;
+
+    public ProductService(ProductRepository productRepository, ProductMaterialRepository productMaterialRepository) {
         this.productRepository = productRepository;
+        this.productMaterialRepository = productMaterialRepository;
     }
 
     public ProductResponseDTO createProduct(ProductRequestDTO dto) {
@@ -92,6 +99,7 @@ public class ProductService {
         product.setName(dto.getName());
         product.setPrice(dto.getPrice());
         Product updated = productRepository.save(product);
+        logger.debug("Product updated successfully id: {}", updated.getId());
         return toResponseDTO(updated);
     }
 
@@ -101,6 +109,37 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
         productRepository.delete(product);
         logger.debug("Product deleted successfully id: {}", id);
+    }
+
+    public List<ProducibleProductResponseDTO> getProducibleProducts() {
+        logger.debug("Getting all producible products");
+        List<ProducibleProductResponseDTO> result = new ArrayList<>();
+
+        for (Product product : productRepository.findAll()) {
+            List<ProductMaterial> materials = productMaterialRepository.findByProduct(product);
+
+            if (materials.isEmpty())
+                continue;
+
+            int maxQuantity = Integer.MAX_VALUE;
+
+            for (ProductMaterial pm : materials) {
+                float stock = pm.getRawMaterial().getStockQuantity();
+                int required = pm.getQuantityRequired();
+                int canProduce = (int) (stock / required);
+                maxQuantity = Math.min(maxQuantity, canProduce);
+            }
+
+            if (maxQuantity > 0) {
+                result.add(new ProducibleProductResponseDTO(
+                        product.getId(), product.getCode(), product.getName(),
+                        product.getPrice(), maxQuantity));
+            }
+        }
+
+        result.sort((a, b) -> b.getPrice().compareTo(a.getPrice()));
+        logger.debug("Producible products found: {}", result.size());
+        return result;
     }
 
     private ProductResponseDTO toResponseDTO(Product product) {

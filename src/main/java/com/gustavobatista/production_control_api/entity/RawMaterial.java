@@ -21,6 +21,9 @@ public class RawMaterial {
     @Column(nullable = false)
     private float stockQuantity;
 
+    public RawMaterial() {
+    }
+
     public RawMaterial(Long id, String code, String name, float stockQuantity) {
         this.id = id;
         this.code = code;

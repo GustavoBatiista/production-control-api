@@ -12,7 +12,7 @@
 	<artifactId>production-control-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>production-control-api</name>
-	<description>Projeto Mao na massa</description>
+	<description>Production Control API</description>
 	<url/>
 	<licenses>
 		<license/>
