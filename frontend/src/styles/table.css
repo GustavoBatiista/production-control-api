@@ -1,0 +1,9 @@
+.table-container {
+    max-width: 900px;
+    margin: 24px auto;
+    border: 1px solid #bdbdbd;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    background: white;
+  }
