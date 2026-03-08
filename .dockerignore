@@ -1,0 +1,8 @@
+target/
+frontend/
+.git/
+*.md
+.env
+.idea
+.vscode
+node_modules
